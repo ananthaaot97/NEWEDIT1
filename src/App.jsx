@@ -1,5 +1,4 @@
-// Import React library and hooks
-import React, { useState } from "react";
+ import React, { useState } from "react";
 import "./App.css";
 
 const initialForm = {
@@ -12,12 +11,15 @@ const initialForm = {
   password: "",
   confirmPassword: "",
   terms: false,
+  profilePic: null,
 };
 
 function App() {
   const [formData, setFormData] = useState(initialForm);
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const validateField = (name, value, allValues = formData) => {
     switch (name) {
@@ -68,8 +70,11 @@ function App() {
   };
 
   const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const updated = { ...formData, [name]: type === "checkbox" ? checked : value };
+    const { name, value, type, checked, files } = e.target;
+    const updated = {
+      ...formData,
+      [name]: type === "checkbox" ? checked : type === "file" ? files[0] : value,
+    };
     setFormData(updated);
 
     if (touched[name]) {
@@ -100,7 +105,7 @@ function App() {
     });
 
     if (validateForm()) {
-      alert("Account Created Successfully ✅");
+      alert("Account Created Successfully For Anime updates✅");
       setFormData(initialForm);
       setErrors({});
       setTouched({});
@@ -108,12 +113,36 @@ function App() {
   };
 
   return (
-    <div className="page">
-      <div className="card">
-        <h2>Create Account</h2>
-        <form onSubmit={handleSubmit} noValidate>
-          <div className="form-row">
-            <div className="form-group half">
+    <div className="perplexity-bg dark-bg">
+      <div className="form-container wider blur">
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          <h2 className="form-title">Create Account</h2>
+          <div className="subtitle">Join our for Anime community by filling the information below.</div>
+          
+          {/* Profile picture (optional) */}
+          <div className="profile-upload-row">
+            <label htmlFor="profilePic" className="profile-label">
+              <span role="img" aria-label="Profile"></span> Profile Photo (optional)
+            </label>
+            <input
+              type="file"
+              name="profilePic"
+              id="profilePic"
+              accept="image/*"
+              onChange={handleChange}
+              className="profile-input"
+            />
+            {formData.profilePic && (
+              <img
+                src={URL.createObjectURL(formData.profilePic)}
+                alt="Preview"
+                className="profile-preview"
+              />
+            )}
+          </div>
+
+          <div className="input-row">
+            <div className="input-group">
               <label>First Name *</label>
               <input
                 name="firstName"
@@ -122,10 +151,12 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.firstName}
+                className={errors.firstName ? "invalid" : ""}
+                autoComplete="given-name"
               />
               {errors.firstName && <span className="error">{errors.firstName}</span>}
             </div>
-            <div className="form-group half">
+            <div className="input-group">
               <label>Last Name *</label>
               <input
                 name="lastName"
@@ -134,13 +165,14 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.lastName}
+                className={errors.lastName ? "invalid" : ""}
+                autoComplete="family-name"
               />
               {errors.lastName && <span className="error">{errors.lastName}</span>}
             </div>
           </div>
-
-          <div className="form-row">
-            <div className="form-group half">
+          <div className="input-row">
+            <div className="input-group">
               <label>Email *</label>
               <input
                 name="email"
@@ -149,10 +181,12 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.email}
+                className={errors.email ? "invalid" : ""}
+                autoComplete="email"
               />
               {errors.email && <span className="error">{errors.email}</span>}
             </div>
-            <div className="form-group half">
+            <div className="input-group">
               <label>Phone *</label>
               <input
                 name="phone"
@@ -161,13 +195,14 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.phone}
+                className={errors.phone ? "invalid" : ""}
+                autoComplete="tel"
               />
               {errors.phone && <span className="error">{errors.phone}</span>}
             </div>
           </div>
-
-          <div className="form-row">
-            <div className="form-group half">
+          <div className="input-row">
+            <div className="input-group">
               <label>Country *</label>
               <select
                 name="country"
@@ -175,6 +210,7 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.country}
+                className={errors.country ? "invalid" : ""}
               >
                 <option value="">Select…</option>
                 <option value="India">India</option>
@@ -183,7 +219,7 @@ function App() {
               </select>
               {errors.country && <span className="error">{errors.country}</span>}
             </div>
-            <div className="form-group half">
+            <div className="input-group">
               <label>Date of Birth *</label>
               <input
                 name="dob"
@@ -192,55 +228,83 @@ function App() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 aria-invalid={!!errors.dob}
+                className={errors.dob ? "invalid" : ""}
               />
               {errors.dob && <span className="error">{errors.dob}</span>}
             </div>
           </div>
-
-          <div className="form-row">
-            <div className="form-group half">
+          <div className="input-row">
+            <div className="input-group">
               <label>Password *</label>
-              <input
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                aria-invalid={!!errors.password}
-              />
+              <div className="password-row">
+                <input
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  value={formData.password}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  aria-invalid={!!errors.password}
+                  className={errors.password ? "invalid" : ""}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="showpwd-btn"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? "○" : "◉"}
+                </button>
+              </div>
               {errors.password && <span className="error">{errors.password}</span>}
             </div>
-            <div className="form-group half">
+            <div className="input-group">
               <label>Confirm Password *</label>
-              <input
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                aria-invalid={!!errors.confirmPassword}
-              />
-              {errors.confirmPassword && (
-                <span className="error">{errors.confirmPassword}</span>
-              )}
+              <div className="password-row">
+                <input
+                  name="confirmPassword"
+                  type={showConfirm ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  aria-invalid={!!errors.confirmPassword}
+                  className={errors.confirmPassword ? "invalid" : ""}
+                  autoComplete="new-password"
+                />
+                <button
+                  type="button"
+                  className="showpwd-btn"
+                  tabIndex={-1}
+                  onClick={() => setShowConfirm((v) => !v)}
+                  aria-label={showConfirm ? "Hide confirm password" : "Show confirm password"}
+                >
+                  {showConfirm ? "🙈" : "👁️"}
+                </button>
+              </div>
+              {errors.confirmPassword && <span className="error">{errors.confirmPassword}</span>}
             </div>
           </div>
-
-          <div className="form-group checkbox">
-            <label>
+          <div className="checkbox-row">
+            <label className="checkbox-label">
               <input
                 type="checkbox"
                 name="terms"
                 checked={formData.terms}
                 onChange={handleChange}
-              />{" "}
-              I agree to Terms & Conditions
+              />
+              <span>I agree to Terms & Conditions</span>
             </label>
             {errors.terms && <span className="error">{errors.terms}</span>}
           </div>
-
-          <button type="submit">Register</button>
+          <button type="submit" className="register-btn">
+            Register
+          </button>
         </form>
+        <div className="form-footer">
+          <span>Already have an account?</span>{" "}
+          <a href="#" className="login-link">Login</a>
+        </div>
       </div>
     </div>
   );
